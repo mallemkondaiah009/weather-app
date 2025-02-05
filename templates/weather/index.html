@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Georgia', serif;
+            background: #f5f5dc; /* Ivory background */
+            color: #333; /* Dark charcoal text */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .weather-container {
+            background: #fffdf0; /* Off-white */
+            border: 1px solid #d4af37; /* Gold border */
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 1200px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        /* Search Bar Styling */
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"] {
+            padding: 0.75rem 1rem;
+            width: 60%;
+            border: 1px solid #d4af37; /* Gold border */
+            border-radius: 25px; /* Rounded corners */
+            margin-right: 0.5rem;
+            font-family: 'Arial', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #b8860b; /* Darker gold */
+            box-shadow: 0 0 5px rgba(184, 134, 11, 0.5); /* Subtle glow on focus */
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: #d4af37; /* Gold */
+            color: #fffdf0; /* Off-white */
+            border: none;
+            border-radius: 25px; /* Rounded corners */
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #b8860b; /* Darker gold */
+            transform: scale(1.05); /* Slight scaling effect */
+        }
+
+        /* Weather Info Styling */
+        .weather-info {
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .weather-info h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .weather-info img {
+            display: block;
+            margin: 0 auto 1rem auto;
+        }
+
+        /* Grid Layout */
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Weather Field Styling */
+        .weather-field {
+            background: #fffdf0; /* Off-white */
+            border: 1px solid #d4af37; /* Gold border */
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .weather-field i {
+            color: #d4af37; /* Gold */
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .weather-field strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .weather-field span {
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .weather-grid {
+                grid-template-columns: 1fr; /* Single column on mobile */
+            }
+
+            .weather-field {
+                padding: 1rem;
+            }
+
+            .weather-field i {
+                font-size: 1.5rem;
+            }
+
+            .weather-field strong {
+                font-size: 1rem;
+            }
+
+            .weather-field span {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            input[type="text"] {
+                width: 70%;
+            }
+
+            button {
+                padding: 0.5rem 1rem;
+            }
+
+            .weather-field {
+                padding: 0.75rem;
+            }
+
+            .weather-field i {
+                font-size: 1.2rem;
+            }
+
+            .weather-field strong {
+                font-size: 0.9rem;
+            }
+
+            .weather-field span {
+                font-size: 1rem;
+            }
+        }
+
+        /* Error Message */
+        .error {
+            color: #b8860b; /* Dark gold */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="weather-container">
+        <h1>Weather App</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="city" placeholder="Enter city name" required>
+            <button type="submit">Get Weather</button>
+        </form>
+        {% if weather %}
+            {% if weather.error %}
+                <p class="error">{{ weather.error }}</p>
+            {% else %}
+                <div class="weather-info">
+                    <h2>{{ weather.city }}, {{ weather.country }}</h2>
+                    <img class="weather-icon" src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather Icon">
+                    
+                    <!-- Weather Grid -->
+                    <div class="weather-grid">
+                        <!-- Temperature -->
+                        <div class="weather-field">
+                            <i class="fas fa-thermometer-half"></i>
+                            <strong>Temperature</strong>
+                            <span>{{ weather.temperature }}°C</span>
+                        </div>
+
+                        <!-- Feels Like -->
+                        <div class="weather-field">
+                            <i class="fas fa-thermometer-three-quarters"></i>
+                            <strong>Feels Like</strong>
+                            <span>{{ weather.feels_like }}°C</span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="weather-field">
+                            <i class="fas fa-cloud"></i>
+                            <strong>Description</strong>
+                            <span>{{ weather.description }}</span>
+                        </div>
+
+                        <!-- Humidity -->
+                        <div class="weather-field">
+                            <i class="fas fa-tint"></i>
+                            <strong>Humidity</strong>
+                            <span>{{ weather.humidity }}%</span>
+                        </div>
+
+                        <!-- Pressure -->
+                        <div class="weather-field">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <strong>Pressure</strong>
+                            <span>{{ weather.pressure }} hPa</span>
+                        </div>
+
+                        <!-- Wind Speed -->
+                        <div class="weather-field">
+                            <i class="fas fa-wind"></i>
+                            <strong>Wind Speed</strong>
+                            <span>{{ weather.wind_speed }} m/s</span>
+                        </div>
+
+                        <!-- Wind Direction -->
+                        <div class="weather-field">
+                            <i class="fas fa-compass"></i>
+                            <strong>Wind Direction</strong>
+                            <span>{{ weather.wind_deg }}°</span>
+                        </div>
+
+                        <!-- Cloudiness -->
+                        <div class="weather-field">
+                            <i class="fas fa-cloud-sun"></i>
+                            <strong>Cloudiness</strong>
+                            <span>{{ weather.clouds }}%</span>
+                        </div>
+
+                        <!-- Visibility -->
+                        <div class="weather-field">
+                            <i class="fas fa-eye"></i>
+                            <strong>Visibility</strong>
+                            <span>{{ weather.visibility }} meters</span>
+                        </div>
+
+                        <!-- Sunrise -->
+                        <div class="weather-field">
+                            <i class="fas fa-sun"></i>
+                            <strong>Sunrise</strong>
+                            <span>{{ weather.sunrise|date:"H:i" }}</span>
+                        </div>
+
+                        <!-- Sunset -->
+                        <div class="weather-field">
+                            <i class="fas fa-moon"></i>
+                            <strong>Sunset</strong>
+                            <span>{{ weather.sunset|date:"H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>
